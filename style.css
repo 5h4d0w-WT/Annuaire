@@ -1,0 +1,249 @@
+/* =========================
+   RÉINITIALISATION
+========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #222;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+header {
+    background-color: #1f2937;
+    color: white;
+    padding: 25px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 25px 0;
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+nav a,
+nav summary {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #374151;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+nav a:hover,
+nav summary:hover {
+    background-color: #4b5563;
+}
+
+details {
+    position: relative;
+}
+
+details a {
+    display: block;
+    margin-top: 5px;
+}
+
+details[open] {
+    background-color: #374151;
+    padding: 5px;
+    border-radius: 6px;
+}
+
+
+/* =========================
+   CONTENU PRINCIPAL
+========================= */
+
+main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+section {
+    background-color: white;
+    padding: 25px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+h2,
+h3,
+h4 {
+    margin-top: 0;
+}
+
+
+/* =========================
+   TABLEAU
+========================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    border: 1px solid #d1d5db;
+    padding: 15px;
+    text-align: left;
+}
+
+th {
+    background-color: #e5e7eb;
+}
+
+tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+
+/* =========================
+   FORMULAIRE
+========================= */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #9ca3af;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+
+/* =========================
+   BOUTONS
+========================= */
+
+button {
+    padding: 12px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button[type="submit"] {
+    background-color: #2563eb;
+    color: white;
+}
+
+button[type="reset"] {
+    background-color: #6b7280;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    background-color: #1f2937;
+    color: white;
+    padding: 30px;
+}
+
+footer section {
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+footer article {
+    margin-bottom: 20px;
+}
+
+footer address {
+    font-style: normal;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+
+    nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    nav a,
+    nav summary {
+        text-align: center;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
+    main {
+        padding: 0 10px;
+    }
+}
+
+.zone-cachee {
+    display: none;
+}
+
+#bouton-paiement {
+    background-color: #16a34a;
+    color: white;
+}
