@@ -10,6 +10,7 @@ load_dotenv()
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 MONGODB_URI = os.getenv("MONGODB_URI")
 MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME")
 
@@ -62,16 +63,19 @@ def creer_annonce():
     code_suppression = str(uuid.uuid4())
 
     annonce = {
-        "id": id_annonce,
-        "numero": numero,
-        "description": description,
-        "infosup": infosup,
-        "categorie": categorie,
+    "id": id_annonce,
+    "numero": numero,
+    "description": description,
+    "infosup": infosup,
+    "categorie": categorie,
 
-        # Paiement
-        "paiement": False,
-        "active": False
-    }
+    # Paiement
+    "paiement": False,
+    "active": False,
+
+    # Identifiant de l'abonnement Stripe
+    "stripe_subscription_id": None
+}
 
     annonces_collection.insert_one({
         "annonce": annonce,
@@ -135,9 +139,15 @@ cancel_url=(
 
             metadata={
                 "id_annonce": id_annonce
-            }
+            },
+                
+            subscription_data={
+                "metadata": {
+                "id_annonce": id_annonce
+        }
+    }
 
-        )
+)
 
         return jsonify({
             "url": session.url
@@ -151,6 +161,105 @@ cancel_url=(
             "erreur": "Impossible de créer le paiement Stripe"
         }), 500
 
+# ==================================================
+# WEBHOOK STRIPE
+# ==================================================
+
+@app.route("/webhook", methods=["POST"])
+def webhook_stripe():
+
+    payload = request.data
+    signature = request.headers.get("Stripe-Signature")
+
+    try:
+
+        evenement = stripe.Webhook.construct_event(
+            payload,
+            signature,
+            STRIPE_WEBHOOK_SECRET
+        )
+
+    except ValueError:
+
+        return "Payload invalide", 400
+
+    except stripe.error.SignatureVerificationError:
+
+        return "Signature invalide", 400
+
+
+    # Paiement initial terminé
+    if evenement["type"] == "checkout.session.completed":
+
+        session = evenement["data"]["object"]
+
+        id_annonce = session["metadata"].get("id_annonce")
+
+        abonnement_id = session.get("subscription")
+
+        if id_annonce and abonnement_id:
+
+            annonces_collection.update_one(
+
+                {
+                    "annonce.id": id_annonce
+                },
+
+                {
+                    "$set": {
+                        "annonce.paiement": True,
+                        "annonce.active": True,
+                        "annonce.stripe_subscription_id": abonnement_id
+                    }
+                }
+
+            )
+
+
+    # Renouvellement mensuel payé
+    elif evenement["type"] == "invoice.paid":
+
+        facture = evenement["data"]["object"]
+
+        abonnement_id = facture.get("subscription")
+
+        if abonnement_id:
+
+            annonces_collection.update_one(
+
+                {
+                    "annonce.stripe_subscription_id":
+                    abonnement_id
+                },
+
+                {
+                    "$set": {
+                        "annonce.paiement": True,
+                        "annonce.active": True
+                    }
+                }
+
+            )
+
+
+    # Abonnement terminé
+    elif evenement["type"] == "customer.subscription.deleted":
+
+        abonnement = evenement["data"]["object"]
+
+        abonnement_id = abonnement["id"]
+
+        annonces_collection.delete_one(
+
+            {
+                "annonce.stripe_subscription_id":
+                abonnement_id
+            }
+
+        )
+
+
+    return "OK", 200
 
 # ==================================================
 # AFFICHER LES ANNONCES D'UNE CATÉGORIE
