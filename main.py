@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+from pymongo import MongoClient
 import stripe
 import uuid
 import os
@@ -9,17 +10,17 @@ load_dotenv()
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID")
+MONGODB_URI = os.getenv("MONGODB_URI")
+MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME")
+
+client = MongoClient(MONGODB_URI)
+
+db = client[MONGODB_DB_NAME]
+
+annonces_collection = db["annonces"]
 
 app = Flask(__name__)
 CORS(app)
-
-
-# ==================================================
-# STOCKAGE TEMPORAIRE DES ANNONCES
-# ==================================================
-
-annonces = {}
-
 
 # ==================================================
 # TEST DU SERVEUR
@@ -72,10 +73,10 @@ def creer_annonce():
         "active": False
     }
 
-    annonces[id_annonce] = {
+    annonces_collection.insert_one({
         "annonce": annonce,
         "code_suppression": code_suppression
-    }
+    })
 
     return jsonify({
         "message": "Annonce créée. Paiement requis.",
@@ -99,7 +100,11 @@ def paiement():
 
     id_annonce = donnees.get("id_annonce")
 
-    if id_annonce not in annonces:
+    annonce_existante = annonces_collection.find_one({
+        "annonce.id": id_annonce
+    })
+
+    if annonce_existante is None:
         return jsonify({
             "erreur": "Annonce introuvable"
         }), 404
@@ -156,14 +161,15 @@ def afficher_annonces(categorie):
 
     resultats = []
 
-    for element in annonces.values():
+    annonces_trouvees = annonces_collection.find({
+        "annonce.categorie": categorie,
+        "annonce.active": True
+    })
 
-        annonce = element["annonce"]
+    for element in annonces_trouvees:
 
-        if (
-            annonce["categorie"] == categorie
-            and annonce["active"] is True
-        ):
+            annonce = element["annonce"]
+
             resultats.append({
                 "id": annonce["id"],
                 "numero": annonce["numero"],
@@ -172,7 +178,6 @@ def afficher_annonces(categorie):
             })
 
     return jsonify(resultats), 200
-
 
 # ==================================================
 # SUPPRIMER UNE ANNONCE
@@ -195,21 +200,19 @@ def supprimer_annonce():
             "erreur": "Code de suppression manquant"
         }), 400
 
-    id_a_supprimer = None
+    annonce_trouvee = annonces_collection.find_one({
+        "code_suppression": code_suppression
+    })
 
-    for id_annonce, element in annonces.items():
-
-        if element["code_suppression"] == code_suppression:
-            id_a_supprimer = id_annonce
-            break
-
-    if id_a_supprimer is None:
+    if annonce_trouvee is None:
         return jsonify({
             "erreur": "Code de suppression incorrect"
         }), 404
 
     # Suppression de l'annonce
-    del annonces[id_a_supprimer]
+    annonces_collection.delete_one({
+        "_id": annonce_trouvee["_id"]
+    })
 
     return jsonify({
         "message": "Annonce supprimée définitivement"
