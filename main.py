@@ -117,16 +117,16 @@ def paiement():
                 }
             ],
 
-            success_url=(
-                "https://5h4d0w-wt.github.io/"
-                "?paiement=succes"
-                "&session_id={CHECKOUT_SESSION_ID}"
-            ),
+           success_url=(
+    "https://5h4d0w-wt.github.io/Annuaire/"
+    "?paiement=succes"
+    "&session_id={CHECKOUT_SESSION_ID}"
+),
 
-            cancel_url=(
-                "https://5h4d0w-wt.github.io/"
-                "?paiement=annule"
-            ),
+cancel_url=(
+    "https://5h4d0w-wt.github.io/Annuaire/"
+    "?paiement=annule"
+),
 
             metadata={
                 "id_annonce": id_annonce
