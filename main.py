@@ -8,6 +8,7 @@ import os
 load_dotenv()
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID")
 
 app = Flask(__name__)
 CORS(app)
@@ -83,7 +84,7 @@ def creer_annonce():
 
 
 # ==================================================
-# SIMULATION DE PAIEMENT
+# PAIEMENT STRIPE CHECKOUT
 # ==================================================
 
 @app.route("/api/paiement", methods=["POST"])
@@ -103,17 +104,47 @@ def paiement():
             "erreur": "Annonce introuvable"
         }), 404
 
-    # POUR L'INSTANT :
-    # on simule le paiement réussi
-    annonces[id_annonce]["annonce"]["paiement"] = True
-    annonces[id_annonce]["annonce"]["active"] = True
+    try:
 
-    code_suppression = annonces[id_annonce]["code_suppression"]
+        session = stripe.checkout.Session.create(
 
-    return jsonify({
-        "message": "Paiement confirmé. Annonce publiée.",
-        "code_suppression": code_suppression
-    }), 200
+            mode="subscription",
+
+            line_items=[
+                {
+                    "price": STRIPE_PRICE_ID,
+                    "quantity": 1
+                }
+            ],
+
+            success_url=(
+                "https://5h4d0w-wt.github.io/"
+                "?paiement=succes"
+                "&session_id={CHECKOUT_SESSION_ID}"
+            ),
+
+            cancel_url=(
+                "https://5h4d0w-wt.github.io/"
+                "?paiement=annule"
+            ),
+
+            metadata={
+                "id_annonce": id_annonce
+            }
+
+        )
+
+        return jsonify({
+            "url": session.url
+        }), 200
+
+    except Exception as erreur:
+
+        print("ERREUR STRIPE :", erreur)
+
+        return jsonify({
+            "erreur": "Impossible de créer le paiement Stripe"
+        }), 500
 
 
 # ==================================================
