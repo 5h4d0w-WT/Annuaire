@@ -136,13 +136,12 @@ formulaire.addEventListener("submit", async function(event) {
 
 
 // ==========================================
-// PAIEMENT
+// PAIEMENT STRIPE CHECKOUT
 // ==========================================
 
 boutonPaiement.addEventListener(
     "click",
     async function() {
-
 
         if (!idAnnonceEnAttente) {
 
@@ -150,6 +149,10 @@ boutonPaiement.addEventListener(
 
         }
 
+        boutonPaiement.disabled = true;
+
+        boutonPaiement.textContent =
+            "Redirection vers Stripe...";
 
         try {
 
@@ -179,68 +182,47 @@ boutonPaiement.addEventListener(
 
             );
 
-
             const donnees =
                 await reponse.json();
-
 
             if (!reponse.ok) {
 
                 alert(
+
                     donnees.erreur ||
-                    "Erreur de paiement."
+
+                    "Impossible de démarrer le paiement."
+
                 );
+
+                boutonPaiement.disabled = false;
+
+                boutonPaiement.textContent =
+                    "Payer et publier mon annonce";
 
                 return;
 
             }
 
+            // Redirection vers la vraie page Stripe
 
-            alert(
+            window.location.href =
+                donnees.url;
 
-                "Paiement confirmé !\n\n" +
+        }
 
-                "Votre annonce est maintenant publiée.\n\n" +
-
-                "IMPORTANT : votre code de suppression est :\n\n" +
-
-                donnees.code_suppression +
-
-                "\n\nConservez-le précieusement."
-
-            );
-
-
-            // Réinitialisation
-
-            formulaire.reset();
-
-
-            zonePaiement.classList.add(
-                "zone-cachee"
-            );
-
-
-            formulaire.style.display =
-                "flex";
-
-
-            idAnnonceEnAttente =
-                null;
-
-
-            // Recharge les annonces
-
-            chargerAnnonces();
-
-
-        } catch (erreur) {
+        catch (erreur) {
 
             console.error(erreur);
 
             alert(
                 "Impossible de contacter le backend."
             );
+
+            boutonPaiement.disabled = false;
+
+            boutonPaiement.textContent =
+                "Payer et publier mon annonce";
 
         }
 
