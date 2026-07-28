@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="UTF-8">
+        <title>Annuaire</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body data-categorie="coiffeurs">
+        <header>
+            <h1>Annuaire téléphonique Français</h1>
+            <nav>
+                    <a href="sante.html">Santé</a>
+                    <a href="immobilier.html">Immobilier</a>
+                    <a href="scolaire.html">Scolaire</a>
+                    <a href="plomberie.html">Plomberie</a>
+                    <a href="electricien.html">Electricien</a>
+                    <a href="sport.html">Sport</a>
+                    <a href="agences.html">Agences</a> 
+                    <a href="coiffeurs.html">Coiffeurs</a> 
+                <details>
+                    <summary>Autres</summary>
+                    <a href="livraison.html">Livraison</a>
+                    <a href="pharmacie.html">Pharmacie</a>
+                    <a href="bijouterie.html">Bijouterie</a>
+                    <a href="parfumerie.html">Parfumerie</a>
+                    <a href="abonnements.html">Abonnements</a>
+                    <a href="tech.html">Secteur de la tech</a>
+                    <a href="divers.html">Divers</a>
+                </details>
+            </nav>
+        </article>
+        </header>
+        <main>
+            <section>
+                <h2>Annuaire des bijouteries :</h2>
+                   <table>
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Information supplémentaire</th>
+                                <th>Numéro</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="resultats">
+                        </tbody>
+                    </table>
+            </section>
+            <section>
+                <h3>Formulaire</h3>
+                <form id="formulaire-ajout">
+                    <label for="num">Numéro :</label>
+                    <input type="tel" id="num" required>
+                    <label for="description">Description :</label>
+                    <textarea id="description" required></textarea>
+                    <label for="infosup">Information suplémentaire :</label>
+                    <input type="text" id="infosup">
+                    <button type="submit">S'ajouter</button>
+                    <button type="reset">Effacer</button>
+                </form>
+                <div id="zone-paiement" class="zone-cachee">
+
+    <h3>Votre annonce est prête</h3>
+
+    <p>
+        Votre annonce sera publiée après confirmation du paiement.
+    </p>
+
+    <p>
+        Prix : <strong>1 € / mois</strong>
+    </p>
+
+    <button id="bouton-paiement">
+        Payer et publier mon annonce
+    </button>
+
+</div>
+<div id="confirmation-annonce" class="zone-cachee">
+
+    <h3>Annonce publiée avec succès ✅</h3>
+
+    <p>
+        Votre annonce est maintenant visible dans l'annuaire.
+    </p>
+
+    <p>
+        Conservez précieusement votre code de suppression :
+    </p>
+
+    <strong id="code-affiche"></strong>
+
+    <p>
+        Ce code vous permettra de supprimer votre annonce plus tard.
+    </p>
+
+</div>
+            </section>
+            <section>
+    <h3>Supprimer une annonce</h3>
+
+    <p>
+        Vous avez reçu un code de suppression lors de la création de votre annonce.
+        Entrez-le ci-dessous pour supprimer votre annonce définitivement.
+    </p>
+
+    <form id="formulaire-suppression">
+        <label for="code-suppression">
+            Code de suppression :
+        </label>
+
+        <input
+            type="text"
+            id="code-suppression"
+            required
+        >
+
+        <button type="submit">
+            Supprimer mon annonce
+        </button>
+    </form>
+
+    <p id="message-suppression"></p>
+</section>
+        </main>
+        <footer>
+            <section>
+                <h4>Information sur la page :</h4>
+                <article>
+                    <p>
+                        En cas de problème ou d'information supplémentaire, me contacter à l'adresse mail suivante : <address>annuaire.site@outlook.com</address> 
+                    </p>
+                </article>
+                <article>
+                    <aside>
+                        <ol>
+                            <li>Etape 1 (à remplir à la fin)</li>
+                            <li>Etape 2</li>
+                            <li>Etape 3</li>
+                            <li>...</li>
+                        </ol>
+                    </aside>
+                    <aside>
+                        <p>Ce site Web est un annuaire sans barre de recherche, il est ordonné en catégorie, tout le monde peut s'ajouter dessus (dans la bonne catégorie) pour seulement 1€ par mois.</p>
+                        <p>Pour s'ajouter à la catégorie souhaité il faut remplir le formulaire et cliquer sur s'ajouter dans la catégorie voulu.</p>
+                    </aside>
+                </article>
+            </section>
+        </footer>
+        <script src="script.js"></script>
+    </body>
+</html>
