@@ -73,6 +73,9 @@ details[open] {
     border-radius: 6px;
 }
 
+.savoir {
+    display: none;
+}
 
 /* =========================
    CONTENU PRINCIPAL
