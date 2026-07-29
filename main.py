@@ -84,7 +84,8 @@ def creer_annonce():
 
     return jsonify({
         "message": "Annonce créée. Paiement requis.",
-        "id_annonce": id_annonce
+        "id_annonce": id_annonce,
+        "code_suppression": code_suppression
     }), 201
 
 
@@ -193,9 +194,10 @@ def webhook_stripe():
 
         session = evenement["data"]["object"]
 
-        id_annonce = session["metadata"].get("id_annonce")
+        metadata = session["metadata"] or {}
+        id_annonce = metadata["id_annonce"] if "id_annonce" in metadata else None
 
-        abonnement_id = session.get("subscription")
+        abonnement_id = session["subscription"] if "subscription" in session else None
 
         if id_annonce and abonnement_id:
 
@@ -221,7 +223,7 @@ def webhook_stripe():
 
         facture = evenement["data"]["object"]
 
-        abonnement_id = facture.get("subscription")
+        abonnement_id = facture["subscription"] if "subscription" in facture else None
 
         if abonnement_id:
 
@@ -317,6 +319,16 @@ def supprimer_annonce():
         return jsonify({
             "erreur": "Code de suppression incorrect"
         }), 404
+
+    # Annulation de l'abonnement Stripe (sinon l'utilisateur
+    # continue d'être prélevé même après suppression)
+    abonnement_id = annonce_trouvee["annonce"].get("stripe_subscription_id")
+
+    if abonnement_id:
+        try:
+            stripe.Subscription.cancel(abonnement_id)
+        except Exception as erreur:
+            print("ERREUR ANNULATION ABONNEMENT STRIPE :", erreur)
 
     # Suppression de l'annonce
     annonces_collection.delete_one({
