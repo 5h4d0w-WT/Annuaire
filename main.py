@@ -173,96 +173,64 @@ def webhook_stripe():
     signature = request.headers.get("Stripe-Signature")
 
     try:
-
         evenement = stripe.Webhook.construct_event(
             payload,
             signature,
             STRIPE_WEBHOOK_SECRET
         )
-
     except ValueError:
-
         return "Payload invalide", 400
-
     except stripe.error.SignatureVerificationError:
-
         return "Signature invalide", 400
 
+    try:
+        # Paiement initial terminé
+        if evenement["type"] == "checkout.session.completed":
 
-    # Paiement initial terminé
-    if evenement["type"] == "checkout.session.completed":
+            session = evenement["data"]["object"]
+            metadata = session["metadata"] or {}
+            id_annonce = metadata["id_annonce"] if "id_annonce" in metadata else None
+            abonnement_id = session["subscription"] if "subscription" in session else None
 
-        session = evenement["data"]["object"]
-
-        metadata = session["metadata"] or {}
-        id_annonce = metadata["id_annonce"] if "id_annonce" in metadata else None
-
-        abonnement_id = session["subscription"] if "subscription" in session else None
-
-        if id_annonce and abonnement_id:
-
-            annonces_collection.update_one(
-
-                {
-                    "annonce.id": id_annonce
-                },
-
-                {
-                    "$set": {
+            if id_annonce and abonnement_id:
+                annonces_collection.update_one(
+                    {"annonce.id": id_annonce},
+                    {"$set": {
                         "annonce.paiement": True,
                         "annonce.active": True,
                         "annonce.stripe_subscription_id": abonnement_id
-                    }
-                }
+                    }}
+                )
 
-            )
+        # Renouvellement mensuel payé
+        elif evenement["type"] == "invoice.paid":
 
+            facture = evenement["data"]["object"]
+            abonnement_id = facture["subscription"] if "subscription" in facture else None
 
-    # Renouvellement mensuel payé
-    elif evenement["type"] == "invoice.paid":
-
-        facture = evenement["data"]["object"]
-
-        abonnement_id = facture["subscription"] if "subscription" in facture else None
-
-        if abonnement_id:
-
-            annonces_collection.update_one(
-
-                {
-                    "annonce.stripe_subscription_id":
-                    abonnement_id
-                },
-
-                {
-                    "$set": {
+            if abonnement_id:
+                annonces_collection.update_one(
+                    {"annonce.stripe_subscription_id": abonnement_id},
+                    {"$set": {
                         "annonce.paiement": True,
                         "annonce.active": True
-                    }
-                }
+                    }}
+                )
 
+        # Abonnement terminé
+        elif evenement["type"] == "customer.subscription.deleted":
+
+            abonnement = evenement["data"]["object"]
+            abonnement_id = abonnement["id"]
+
+            annonces_collection.delete_one(
+                {"annonce.stripe_subscription_id": abonnement_id}
             )
 
-
-    # Abonnement terminé
-    elif evenement["type"] == "customer.subscription.deleted":
-
-        abonnement = evenement["data"]["object"]
-
-        abonnement_id = abonnement["id"]
-
-        annonces_collection.delete_one(
-
-            {
-                "annonce.stripe_subscription_id":
-                abonnement_id
-            }
-
-        )
-
+    except Exception as erreur:
+        print("ERREUR TRAITEMENT WEBHOOK :", erreur)
 
     return "OK", 200
-
 # ==================================================
 # AFFICHER LES ANNONCES D'UNE CATÉGORIE
 # ==================================================
