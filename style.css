@@ -256,14 +256,22 @@ footer address {
    TITRE
 ========================= */
 
-.titre{
+.titre {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.titre h1 {
+    margin: 0;
+    font-size: clamp(24px, 5vw, 40px);
 }
 
 .titre img {
-    width: 300px;
-    height: 200px;
-    margin: 0px 0px 0px 500px;
+    width: 80px;
+    max-width: 100%;
+    height: auto;
 }
